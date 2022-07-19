@@ -1,0 +1,55 @@
+#each node has the form [parent, player or payoff, label, optionally probability]
+#nodes = [[-1, 0, -1], [0, [0, 100], 'dont enter'], [0, 1, 'enter'], [2, [50, 50], 'dont challenge'], [2, 0, 'challenge'], [4, [0, 70], 'backoff'], [4, [30, 60], 'dont backoff']]
+#nodes = [[-1, 0, -1], [0, 1, 'L'], [0, 1, 'R'], [1, [0, 1], 'L'], [1, [1, 2], 'R'], [2, [2, 3], 'L'], [2, [3, 4], 'R']]
+nodes = [[-1, 0, -1], [0, 1, 'stay in'], [0, 'N', 'go out'], [1, [0, 2], 'disturb'], [1, [1, 1], 'dont disturb'], [2, 1, 'rain', 0.3], [2, 1, 'no rain', 0.7], [5, [-2, 1], 'disturb'], [5, [-1, 0], 'dont disturb'], [6, [2, 2], 'play'], [6, [0, 0], 'dont play']]
+print(len(nodes))
+
+###########################################################
+
+gamePlay = []
+
+for i in range(len(nodes)):
+    gamePlay.insert(len(gamePlay), [nodes[i][1], ''])
+
+print(gamePlay)
+
+###########################################################
+
+for i in range(len(nodes)):
+    parNode = len(nodes) - i - 1
+    parPlayer = nodes[parNode][1]
+    childrenNodes = []
+    childrenPayoffs = []
+    childrenProbabilities = []
+    if type(parPlayer) is int:
+        for j in range(parNode + 1, len(nodes)):
+            if nodes[j][0] == parNode:
+                childrenNodes.insert(len(childrenNodes), j)
+                if type(nodes[j][1]) is list:
+                    childrenPayoffs.insert(len(childrenPayoffs), nodes[j][1][parPlayer])
+                if type(nodes[j][1]) is int:
+                    childrenPayoffs.insert(len(childrenPayoffs), -100000000000) #to edit later
+        optimalPayoffIndex = childrenPayoffs.index(max(childrenPayoffs))
+        optimalChoice = nodes[childrenNodes[optimalPayoffIndex]]
+        gamePlay[parNode][1] = optimalChoice[2]
+        nodes[parNode][1] = optimalChoice[1]
+    if parPlayer == 'N':
+        for j in range(parNode + 1, len(nodes)):
+            if nodes[j][0] == parNode:
+                childrenNodes.insert(len(childrenNodes), j)
+                childrenPayoffs.insert(len(childrenPayoffs), nodes[j][1])
+                childrenProbabilities.insert(len(childrenNodes), nodes[j][3])
+        expectedPayoff = []
+        for j in range(len(childrenPayoffs[0])):
+            ep = 0
+            for k in range(len(childrenNodes)):
+                ep += childrenPayoffs[k][j] * childrenProbabilities[k]
+            expectedPayoff.insert(len(expectedPayoff), ep)
+        nodes[parNode][1] = expectedPayoff
+#print(gamePlay)
+for i in range(len(gamePlay)):
+    if type(gamePlay[i][0]) is int:
+        print(gamePlay[i])
+
+###############################################################################
+
